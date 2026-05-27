@@ -103,7 +103,10 @@ export default function Producers() {
   const getLastStockRegistration = () => {
     if (stocks.length === 0) return undefined;
     
-    const sortedStocks = [...stocks].sort((a, b) => 
+    const stocksWithProducerProduct = stocks.filter(s => s.producerProduct);
+    if (stocksWithProducerProduct.length === 0) return undefined;
+    
+    const sortedStocks = [...stocksWithProducerProduct].sort((a, b) => 
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
     
