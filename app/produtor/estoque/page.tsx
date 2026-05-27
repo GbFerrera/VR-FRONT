@@ -318,7 +318,7 @@ export default function EstoquePage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {editingStock ? 'Atualizar Estoque' : 'Adicionar Estoque'}

@@ -107,7 +107,7 @@ export function ProductHistoryDialog({ product, open, onOpenChange }: ProductHis
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[90vw] h-[90vh] overflow-hidden p-0 gap-0 bg-white">
+      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-hidden p-0 gap-0 bg-white">
         <DialogHeader className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-green-500 to-green-600"></div>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6bTAtMjBjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNC0xLjc5IDQtNCA0LTQtMS43OS00LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
@@ -152,7 +152,7 @@ export function ProductHistoryDialog({ product, open, onOpenChange }: ProductHis
           </div>
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[calc(95vh-200px)] px-8 py-6 bg-white">
+        <div className="overflow-y-auto max-h-[calc(75vh-150px)] px-8 py-6 bg-white">
 
         <Tabs defaultValue="chart" className="mt-6">
           <TabsList className="grid w-full grid-cols-3">

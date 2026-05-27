@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Search, ChevronDown, Users, Truck, Package, AlertTriangle, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { usersService, User } from '@/lib/api';
+import { usersService, User, stocksService, Stock, farmsService, Farm } from '@/lib/api';
 import { toast } from 'sonner';
 
 export default function Producers() {
@@ -24,6 +24,8 @@ export default function Producers() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProducer, setSelectedProducer] = useState<User | null>(null);
   const [summaryProducer, setSummaryProducer] = useState<User | null>(null);
+  const [stocks, setStocks] = useState<Stock[]>([]);
+  const [farms, setFarms] = useState<Farm[]>([]);
 
   useEffect(() => {
     loadProducers();
@@ -45,12 +47,18 @@ export default function Producers() {
   const loadProducers = async () => {
     try {
       setLoading(true);
-      const data = await usersService.getAll('PRODUCER');
-      setProducers(data);
-      setFilteredProducers(data);
+      const [producersData, stocksData, farmsData] = await Promise.all([
+        usersService.getAll('PRODUCER'),
+        stocksService.getAll(),
+        farmsService.getAll(),
+      ]);
+      setProducers(producersData);
+      setFilteredProducers(producersData);
+      setStocks(stocksData);
+      setFarms(farmsData);
     } catch (error) {
-      console.error('Erro ao carregar produtores:', error);
-      toast.error('Erro ao carregar produtores');
+      console.error('Erro ao carregar dados:', error);
+      toast.error('Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
@@ -90,6 +98,71 @@ export default function Producers() {
       console.error('Erro ao excluir produtor:', error);
       toast.error('Erro ao excluir produtor');
     }
+  };
+
+  const getLastStockRegistration = () => {
+    if (stocks.length === 0) return undefined;
+    
+    const sortedStocks = [...stocks].sort((a, b) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+    
+    const lastStock = sortedStocks[0];
+    if (!lastStock.producerProduct) return undefined;
+    
+    const producer = producers.find(p => p.id === lastStock.producerProduct?.producerId);
+    const date = new Date(lastStock.updatedAt);
+    const timeStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ', ' + 
+                    date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    
+    return {
+      producerName: producer?.name || 'Desconhecido',
+      productName: lastStock.producerProduct.product.name,
+      time: timeStr,
+    };
+  };
+
+  const getTopStockProduct = () => {
+    if (stocks.length === 0) return undefined;
+    
+    const productStocks = stocks.reduce((acc, stock) => {
+      if (!stock.producerProduct) return acc;
+      
+      const productName = stock.producerProduct.product.name;
+      const unit = stock.producerProduct.product.unit;
+      
+      if (!acc[productName]) {
+        acc[productName] = { total: 0, unit };
+      }
+      acc[productName].total += stock.quantity;
+      
+      return acc;
+    }, {} as Record<string, { total: number; unit: string }>);
+    
+    const topProduct = Object.entries(productStocks).sort((a, b) => b[1].total - a[1].total)[0];
+    
+    if (!topProduct) return undefined;
+    
+    return {
+      name: topProduct[0],
+      quantity: `${topProduct[1].total.toLocaleString('pt-BR')} ${topProduct[1].unit}`,
+    };
+  };
+
+  const getLargestFarm = () => {
+    if (farms.length === 0) return undefined;
+    
+    const farmsWithArea = farms.filter(f => f.area && f.area > 0);
+    if (farmsWithArea.length === 0) return undefined;
+    
+    const largest = farmsWithArea.sort((a, b) => (b.area || 0) - (a.area || 0))[0];
+    const owner = producers.find(p => p.id === largest.ownerId);
+    
+    return {
+      name: largest.name,
+      area: largest.area || 0,
+      ownerName: owner?.name || 'Desconhecido',
+    };
   };
 
   const mockProducers = [
@@ -276,6 +349,9 @@ export default function Producers() {
                   count: 12,
                   message: '12 produtores com produção baixa',
                 }}
+                lastStockRegistration={getLastStockRegistration()}
+                topStockProduct={getTopStockProduct()}
+                largestFarm={getLargestFarm()}
               />
               <QuickFilters />
             </div>

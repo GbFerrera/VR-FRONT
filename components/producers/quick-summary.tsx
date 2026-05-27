@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Package, MapPin, AlertTriangle } from 'lucide-react';
+import { User, Package, MapPin, AlertTriangle, Box, Warehouse } from 'lucide-react';
 
 interface QuickSummaryProps {
   lastProducer: {
@@ -18,6 +18,20 @@ interface QuickSummaryProps {
     count: number;
     message: string;
   };
+  lastStockRegistration?: {
+    producerName: string;
+    productName: string;
+    time: string;
+  };
+  topStockProduct?: {
+    name: string;
+    quantity: string;
+  };
+  largestFarm?: {
+    name: string;
+    area: number;
+    ownerName: string;
+  };
 }
 
 export function QuickSummary({
@@ -25,6 +39,9 @@ export function QuickSummary({
   topProduct,
   topRegion,
   alerts,
+  lastStockRegistration,
+  topStockProduct,
+  largestFarm,
 }: QuickSummaryProps) {
   return (
     <Card>
@@ -64,6 +81,45 @@ export function QuickSummary({
             <p className="text-xs text-gray-500">{topRegion.count} produtores</p>
           </div>
         </div>
+
+        {lastStockRegistration && (
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Box className="w-4 h-4 text-blue-700" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-800">Último cadastro de estoque</p>
+              <p className="text-sm text-gray-600">{lastStockRegistration.productName}</p>
+              <p className="text-xs text-gray-500">{lastStockRegistration.producerName} • {lastStockRegistration.time}</p>
+            </div>
+          </div>
+        )}
+
+        {topStockProduct && (
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Warehouse className="w-4 h-4 text-purple-700" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-800">Produto com mais estoque</p>
+              <p className="text-sm text-gray-600">{topStockProduct.name}</p>
+              <p className="text-xs text-gray-500">{topStockProduct.quantity}</p>
+            </div>
+          </div>
+        )}
+
+        {largestFarm && (
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-amber-100 rounded-lg">
+              <MapPin className="w-4 h-4 text-amber-700" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-800">Maior fazenda (hectares)</p>
+              <p className="text-sm text-gray-600">{largestFarm.name}</p>
+              <p className="text-xs text-gray-500">{largestFarm.ownerName} • {largestFarm.area} ha</p>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-start gap-3">
           <div className="p-2 bg-red-100 rounded-lg">

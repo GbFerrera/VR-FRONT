@@ -57,7 +57,7 @@ export interface UpdateFarmData {
 
 export const farmsService = {
   async getAll(producerId?: string): Promise<Farm[]> {
-    const params = producerId ? { producerId } : {};
+    const params = producerId ? { ownerId: producerId } : {};
     const response = await api.get<Farm[]>('/farms', { params });
     return response.data;
   },

@@ -289,7 +289,7 @@ export default function ProdutosProdutorPage() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {editingProduct ? 'Editar Produto' : 'Adicionar Produto'}
@@ -402,7 +402,7 @@ export default function ProdutosProdutorPage() {
       </Dialog>
 
       <Dialog open={isCreateProductDialogOpen} onOpenChange={setIsCreateProductDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Criar Novo Produto</DialogTitle>
             <DialogDescription>
