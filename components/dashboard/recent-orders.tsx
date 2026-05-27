@@ -5,11 +5,32 @@ interface Order {
   id: string;
   customer: string;
   product: string;
-  value: string;
-  status: 'pending' | 'completed';
+  value: number;
+  status: 'pending' | 'confirmed' | 'delivered' | 'cancelled';
+  createdAt?: string;
 }
 
 export function RecentOrders({ orders }: { orders: Order[] }) {
+  const getStatusLabel = (status: string) => {
+    const labels = {
+      pending: 'Pendente',
+      confirmed: 'Confirmado',
+      delivered: 'Entregue',
+      cancelled: 'Cancelado',
+    };
+    return labels[status as keyof typeof labels] || 'Detalhes';
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors = {
+      pending: 'bg-orange-100 text-orange-700 hover:bg-orange-200',
+      confirmed: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+      delivered: 'bg-green-100 text-green-700 hover:bg-green-200',
+      cancelled: 'bg-red-100 text-red-700 hover:bg-red-200',
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+  };
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -21,8 +42,13 @@ export function RecentOrders({ orders }: { orders: Order[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {orders.map((order) => (
+        {orders.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p className="text-sm">Nenhum pedido encontrado</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {orders.map((order) => (
             <div
               key={order.id}
               className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors"
@@ -39,21 +65,17 @@ export function RecentOrders({ orders }: { orders: Order[] }) {
                 </div>
               </div>
               <div className="text-right mr-3">
-                <p className="font-bold text-sm text-gray-800">{order.value}</p>
+                <p className="font-bold text-sm text-gray-800">
+                  R$ {typeof order.value === 'number' ? order.value.toFixed(2) : order.value}
+                </p>
               </div>
-              <Badge
-                variant={order.status === 'completed' ? 'default' : 'secondary'}
-                className={
-                  order.status === 'completed'
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                    : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
-                }
-              >
-                {order.status === 'completed' ? 'Detalhes' : 'Detalhes'}
+              <Badge className={getStatusColor(order.status)}>
+                {getStatusLabel(order.status)}
               </Badge>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

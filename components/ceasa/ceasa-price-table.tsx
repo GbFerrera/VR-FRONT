@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Download, Calendar } from 'lucide-react';
+import { Search, Download, Calendar, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import {
   Table,
   TableBody,
@@ -16,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CeasaProduct } from '@/lib/api';
+import { ProductHistoryDialog } from './product-history-dialog';
 
 interface CeasaPriceTableProps {
   products: CeasaProduct[];
@@ -24,6 +26,13 @@ interface CeasaPriceTableProps {
 export function CeasaPriceTable({ products: initialProducts }: CeasaPriceTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedProduct, setSelectedProduct] = useState<CeasaProduct | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleProductClick = (product: CeasaProduct) => {
+    setSelectedProduct(product);
+    setDialogOpen(true);
+  };
 
   const categories = useMemo(() => {
     if (!Array.isArray(initialProducts)) return [];
@@ -102,6 +111,7 @@ export function CeasaPriceTable({ products: initialProducts }: CeasaPriceTablePr
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[60px]"></TableHead>
                 <TableHead className="w-[80px]">Código</TableHead>
                 <TableHead>Produto</TableHead>
                 <TableHead className="text-center">Embalagem</TableHead>
@@ -116,13 +126,47 @@ export function CeasaPriceTable({ products: initialProducts }: CeasaPriceTablePr
             <TableBody>
               {products.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={10} className="text-center py-8 text-gray-500">
                     Nenhum produto encontrado
                   </TableCell>
                 </TableRow>
               ) : (
                 products.map((product) => (
-                  <TableRow key={product.id} className="hover:bg-gray-50">
+                  <TableRow 
+                    key={product.id} 
+                    className="hover:bg-green-50 cursor-pointer transition-colors"
+                    onClick={() => handleProductClick(product)}
+                  >
+                    <TableCell>
+                      {product.imageUrl ? (
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-white border border-gray-200">
+                          <Image
+                            src={`http://localhost:3333${product.imageUrl}`}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `
+                                  <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                  </div>
+                                `;
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">
                       <Badge variant="outline">{product.code}</Badge>
                     </TableCell>
@@ -176,6 +220,12 @@ export function CeasaPriceTable({ products: initialProducts }: CeasaPriceTablePr
           </div>
         </div>
       </CardContent>
+
+      <ProductHistoryDialog 
+        product={selectedProduct}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </Card>
   );
 }

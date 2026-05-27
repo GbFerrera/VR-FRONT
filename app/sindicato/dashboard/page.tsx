@@ -5,12 +5,12 @@ import { StatCard } from '@/components/dashboard/stat-card';
 import { SummaryCard } from '@/components/dashboard/summary-card';
 import { ProductsList } from '@/components/dashboard/products-list';
 import { RecentOrders } from '@/components/dashboard/recent-orders';
-import { SalesChart } from '@/components/dashboard/sales-chart';
+import { CeasaProductsCard } from '@/components/dashboard/ceasa-products-card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, Search, ChevronDown, DollarSign, ShoppingCart, Users, Building2, Package, TrendingUp, Leaf } from 'lucide-react';
+import { Search, ChevronDown, DollarSign, ShoppingCart, Users, Building2, Package, TrendingUp, Leaf } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { productsService, usersService, stocksService, pricesService } from '@/lib/api';
+import { productsService, usersService, stocksService, pricesService, ordersService, companiesService, ceasaService } from '@/lib/api';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -21,7 +21,9 @@ export default function Dashboard() {
     totalCompanies: 0,
     dailyRevenue: 0,
     dailyOrders: 0,
+    ceasaProducts: 0,
   });
+  const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [recentPrices, setRecentPrices] = useState<any[]>([]);
 
@@ -30,15 +32,27 @@ export default function Dashboard() {
       try {
         setLoading(true);
         
-        const [allProducts, allUsers, allStocks, allPrices] = await Promise.all([
+        const [allProducts, allUsers, allStocks, allPrices, allOrders, allCompanies, ceasaStats] = await Promise.all([
           productsService.getAll(),
           usersService.getAll(),
           stocksService.getAll(),
           pricesService.getAll(),
+          ordersService.getAll().catch(() => []),
+          companiesService.getAll().catch(() => []),
+          ceasaService.getStatistics().catch(() => ({ totalProducts: 0, avgPrice: 0, maxPrice: 0, minPrice: 0, maxPriceProduct: 'N/A', minPriceProduct: 'N/A' })),
         ]);
 
         const producers = allUsers.filter(u => u.role === 'PRODUCER');
-        const companies = allUsers.filter(u => u.role === 'ADMIN');
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayOrders = allOrders.filter(order => {
+          const orderDate = new Date(order.createdAt);
+          orderDate.setHours(0, 0, 0, 0);
+          return orderDate.getTime() === today.getTime();
+        });
+        
+        const dailyRevenue = todayOrders.reduce((sum, order) => sum + (order.value || 0), 0);
 
         const productsWithStockAndPrice = allProducts.slice(0, 3).map(product => {
           const stock = allStocks.find(s => s.producerProduct?.productId === product.id);
@@ -56,13 +70,15 @@ export default function Dashboard() {
         setStats({
           totalProducts: allProducts.length,
           totalProducers: producers.length,
-          totalCompanies: companies.length,
-          dailyRevenue: 0,
-          dailyOrders: 0,
+          totalCompanies: allCompanies.length,
+          dailyRevenue: dailyRevenue,
+          dailyOrders: todayOrders.length,
+          ceasaProducts: ceasaStats.totalProducts,
         });
 
         setProducts(productsWithStockAndPrice);
         setRecentPrices(allPrices.slice(0, 5));
+        setOrders(allOrders.slice(0, 5));
       } catch (error) {
         console.error('Erro ao carregar dados do dashboard:', error);
       } finally {
@@ -83,8 +99,8 @@ export default function Dashboard() {
     },
     {
       icon: TrendingUp,
-      label: 'Preços Atualizados',
-      value: recentPrices.length,
+      label: 'Cotações CEASA',
+      value: stats.ceasaProducts,
       bgColor: 'bg-orange-50',
       iconColor: 'bg-orange-500',
       trend: 'up' as const,
@@ -98,15 +114,6 @@ export default function Dashboard() {
     },
   ];
 
-  const orders = [
-    {
-      id: '1',
-      customer: 'Aguardando dados',
-      product: 'Sistema em desenvolvimento',
-      value: 'R$ 0,00',
-      status: 'pending' as const,
-    },
-  ];
 
   if (loading) {
     return (
@@ -134,12 +141,7 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center gap-4">
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              
-              <div className="flex items-center gap-3 pl-4 border-l">
+              <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarFallback className="bg-green-600 text-white">
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -166,7 +168,7 @@ export default function Dashboard() {
             <StatCard
               title="Faturamento do dia"
               value={`R$ ${stats.dailyRevenue.toFixed(2)}`}
-              subtitle="Em desenvolvimento"
+              subtitle="Total de vendas realizadas hoje"
               icon={DollarSign}
               bgColor="bg-green-600"
               textColor="text-white"
@@ -174,7 +176,7 @@ export default function Dashboard() {
             <StatCard
               title="Pedidos de Hoje"
               value={stats.dailyOrders.toString()}
-              subtitle="Em desenvolvimento"
+              subtitle="Total de pedidos recebidos hoje"
               icon={ShoppingCart}
               bgColor="bg-orange-500"
               textColor="text-white"
@@ -206,7 +208,7 @@ export default function Dashboard() {
 
           <div className="grid grid-cols-2 gap-6">
             <ProductsList products={products} />
-            <SalesChart />
+            <CeasaProductsCard />
           </div>
         </div>
     </>

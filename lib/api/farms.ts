@@ -2,14 +2,40 @@ import { api } from './axios';
 
 export interface Farm {
   id: string;
-  producerId: string;
+  ownerId: string;
   name: string;
   latitude?: number;
   longitude?: number;
   address?: string;
   area?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  harvests?: Array<{
+    id: string;
+    producerProduct: {
+      id: string;
+      product: {
+        id: string;
+        name: string;
+        unit: string;
+      };
+    };
+  }>;
+  producerProducts?: Array<{
+    id: string;
+    averageProduction: number;
+    product: {
+      id: string;
+      name: string;
+      unit: string;
+    };
+  }>;
 }
 
 export interface CreateFarmData {

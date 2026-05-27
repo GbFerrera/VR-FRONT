@@ -15,6 +15,8 @@ export interface CeasaProduct {
   pricePerKg: number;
   date: string;
   createdAt: string;
+  imageUrl?: string | null;
+  pdfUrl?: string | null;
 }
 
 export interface CeasaStatistics {

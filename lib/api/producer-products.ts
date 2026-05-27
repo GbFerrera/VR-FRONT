@@ -4,6 +4,7 @@ export interface ProducerProduct {
   id: string;
   producerId: string;
   productId: string;
+  farmId: string;
   averageProduction: number;
   createdAt: string;
   updatedAt: string;
@@ -11,6 +12,10 @@ export interface ProducerProduct {
     id: string;
     name: string;
     unit: string;
+  };
+  farm: {
+    id: string;
+    name: string;
   };
   producer?: {
     id: string;
@@ -22,6 +27,7 @@ export interface ProducerProduct {
 export interface CreateProducerProductData {
   producerId: string;
   productId: string;
+  farmId: string;
   averageProduction: number;
 }
 

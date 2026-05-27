@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, Search, ChevronDown, Settings } from 'lucide-react';
+import { Search, ChevronDown, Settings } from 'lucide-react';
 
 export default function Configuracoes() {
   return (
@@ -22,12 +22,7 @@ export default function Configuracoes() {
             </div>
             
             <div className="flex items-center gap-3">
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              
-              <div className="flex items-center gap-3 pl-4 border-l">
+              <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarFallback className="bg-green-600 text-white">A</AvatarFallback>
                 </Avatar>
@@ -53,10 +48,10 @@ export default function Configuracoes() {
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <Settings className="w-16 h-16 text-gray-300 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Página em Desenvolvimento
+                  Configurações do Sistema
                 </h3>
                 <p className="text-gray-500 max-w-md">
-                  A página de configurações está sendo desenvolvida. Em breve você poderá personalizar o sistema.
+                  Configure as preferências e parâmetros do sistema.
                 </p>
               </div>
             </CardContent>

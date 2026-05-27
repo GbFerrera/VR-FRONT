@@ -6,10 +6,11 @@ import { QuickSummary } from '@/components/producers/quick-summary';
 import { QuickFilters } from '@/components/producers/quick-filters';
 import { ProducersTable } from '@/components/producers/producers-table';
 import { ProducerDialog } from '@/components/producers/producer-dialog';
+import { ProducerSummaryPanel } from '@/components/producers/producer-summary-panel';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Bell, Search, ChevronDown, Users, Truck, Package, AlertTriangle, Plus } from 'lucide-react';
+import { Search, ChevronDown, Users, Truck, Package, AlertTriangle, Plus } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { usersService, User } from '@/lib/api';
 import { toast } from 'sonner';
@@ -22,6 +23,7 @@ export default function Producers() {
   const [searchTerm, setSearchTerm] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProducer, setSelectedProducer] = useState<User | null>(null);
+  const [summaryProducer, setSummaryProducer] = useState<User | null>(null);
 
   useEffect(() => {
     loadProducers();
@@ -193,12 +195,7 @@ export default function Producers() {
                 Novo Produtor
               </Button>
 
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              
-              <div className="flex items-center gap-3 pl-4 border-l">
+              <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarFallback className="bg-green-600 text-white">
                     {user?.name?.charAt(0).toUpperCase() || 'U'}
@@ -258,6 +255,7 @@ export default function Producers() {
                 producers={filteredProducers} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onRowClick={setSummaryProducer}
               />
             </div>
             <div className="space-y-6">
@@ -290,6 +288,13 @@ export default function Producers() {
         producer={selectedProducer}
         onSave={handleSave}
       />
+
+      {summaryProducer && (
+        <ProducerSummaryPanel
+          producer={summaryProducer}
+          onClose={() => setSummaryProducer(null)}
+        />
+      )}
     </>
   );
 }

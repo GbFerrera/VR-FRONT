@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProducerSidebar } from '@/components/dashboard/producer-sidebar';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ProdutorLayout({
   children,
@@ -13,7 +13,8 @@ export default function ProdutorLayout({
 }) {
   const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Desktop começa aberto
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false); // Mobile começa fechado
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -40,35 +41,43 @@ export default function ProdutorLayout({
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar Desktop */}
-      <div className="hidden lg:block">
-        <ProducerSidebar />
+      {/* Sidebar Desktop - Sempre Visível (Colapsável) */}
+      <div className={`hidden lg:block transition-all duration-300 flex-shrink-0 ${sidebarOpen ? 'lg:w-[240px]' : 'lg:w-[70px]'}`}>
+        <div className={`fixed left-0 top-0 h-screen ${sidebarOpen ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+          <ProducerSidebar collapsed={!sidebarOpen} />
+        </div>
       </div>
 
-      {/* Sidebar Mobile */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
+      {/* Sidebar Mobile - Overlay */}
+      <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${mobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
         {/* Overlay */}
         <div 
           className="fixed inset-0 bg-black/50"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setMobileSidebarOpen(false)}
         />
         {/* Sidebar */}
-        <div className="fixed inset-y-0 left-0 w-[240px] bg-white">
-          <ProducerSidebar />
+        <div className={`fixed inset-y-0 left-0 w-[240px] bg-white overflow-y-auto transition-transform duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <ProducerSidebar collapsed={false} />
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 w-full min-w-0">
-        {/* Mobile Menu Button */}
-        <div className="lg:hidden fixed top-4 left-4 z-40">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 bg-[#2d5016] text-white rounded-lg shadow-lg hover:bg-[#3d6020] transition-colors"
-          >
-            {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
+      <main className="flex-1 w-full min-w-0 relative">
+        {/* Toggle Button Desktop */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className={`hidden lg:flex fixed top-4 z-40 items-center justify-center p-2 bg-[#2d5016] text-white rounded-lg shadow-lg hover:bg-[#3d6020] transition-all duration-300 ${sidebarOpen ? 'left-[200px]' : 'left-[30px]'}`}
+        >
+          {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+        </button>
+
+        {/* Menu Button Mobile */}
+        <button
+          onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+          className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-[#2d5016] text-white rounded-lg shadow-lg hover:bg-[#3d6020] transition-colors"
+        >
+          {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
         
         {children}
       </main>

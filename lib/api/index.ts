@@ -8,3 +8,5 @@ export * from './prices';
 export * from './ceasa';
 export * from './harvests';
 export * from './farms';
+export * from './orders';
+export * from './companies';

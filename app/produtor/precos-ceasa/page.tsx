@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, TrendingUp, Calendar } from 'lucide-react';
+import { Search, TrendingUp, Calendar, ImageIcon } from 'lucide-react';
 import { ceasaService } from '@/lib/api/ceasa';
 import type { CeasaProduct } from '@/lib/api/ceasa';
+import Image from 'next/image';
 import {
   Select,
   SelectContent,
@@ -143,21 +144,56 @@ export default function PrecosCeasaPage() {
                   key={product.id}
                   className="flex flex-col md:flex-row md:items-center md:justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-3"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <Badge variant="outline" className="text-xs">
-                        {product.code}
-                      </Badge>
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                  <div className="flex gap-4 flex-1">
+                    {/* Imagem do Produto */}
+                    <div className="flex-shrink-0">
+                      {product.imageUrl ? (
+                        <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden bg-white border border-gray-200">
+                          <Image
+                            src={`http://localhost:3333${product.imageUrl}`}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = `
+                                  <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                  </div>
+                                `;
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-600">
-                      <span className="truncate max-w-[200px]">{product.category}</span>
-                      <span className="hidden md:inline">•</span>
-                      <Badge variant="secondary" className="text-xs">{product.unit}</Badge>
-                      <span className="hidden md:inline">•</span>
-                      <span>Qtd: {product.quantityPerPackage}</span>
-                      <span className="hidden md:inline">•</span>
-                      <span>Class: {product.classification}</span>
+
+                    {/* Informações do Produto */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="outline" className="text-xs">
+                          {product.code}
+                        </Badge>
+                        <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-600">
+                        <span className="truncate max-w-[200px]">{product.category}</span>
+                        <span className="hidden md:inline">•</span>
+                        <Badge variant="secondary" className="text-xs">{product.unit}</Badge>
+                        <span className="hidden md:inline">•</span>
+                        <span>Qtd: {product.quantityPerPackage}</span>
+                        <span className="hidden md:inline">•</span>
+                        <span>Class: {product.classification}</span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex md:flex-col items-center md:items-end justify-between md:justify-start md:text-right md:ml-4 border-t md:border-t-0 pt-3 md:pt-0">

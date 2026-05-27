@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Bell, Search, ChevronDown, TrendingUp, TrendingDown, DollarSign, Package, RefreshCw } from 'lucide-react';
+import { Search, ChevronDown, TrendingUp, TrendingDown, DollarSign, Package, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { ceasaService, CeasaProduct, CeasaStatistics } from '@/lib/api';
 import { toast } from 'sonner';
@@ -96,12 +96,7 @@ export default function PrecoCaixa() {
                 {scraping ? 'Atualizando...' : 'Atualizar Preços'}
               </Button>
 
-              <button className="relative p-2 hover:bg-gray-100 rounded-lg">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
-              
-              <div className="flex items-center gap-3 pl-4 border-l">
+              <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarFallback className="bg-green-600 text-white">
                     {user?.name?.charAt(0).toUpperCase() || 'U'}

@@ -24,13 +24,14 @@ import {
 } from '@/components/ui/select';
 import { Plus, Package, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { productsService, producerProductsService, Product, ProducerProduct } from '@/lib/api';
+import { productsService, producerProductsService, farmsService, Product, ProducerProduct, Farm } from '@/lib/api';
 
 export default function ProdutosProdutorPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [producerProducts, setProducerProducts] = useState<ProducerProduct[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [farms, setFarms] = useState<Farm[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreateProductDialogOpen, setIsCreateProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProducerProduct | null>(null);
@@ -38,6 +39,7 @@ export default function ProdutosProdutorPage() {
 
   const [formData, setFormData] = useState({
     productId: '',
+    farmId: '',
     averageProduction: '',
   });
 
@@ -53,12 +55,14 @@ export default function ProdutosProdutorPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [producerProds, products] = await Promise.all([
+      const [producerProds, products, userFarms] = await Promise.all([
         producerProductsService.getAll(user?.id),
         productsService.getAll(),
+        farmsService.getAll(user?.id),
       ]);
       setProducerProducts(producerProds);
       setAllProducts(products);
+      setFarms(userFarms);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
     } finally {
@@ -71,12 +75,14 @@ export default function ProdutosProdutorPage() {
       setEditingProduct(product);
       setFormData({
         productId: product.productId,
+        farmId: product.farmId,
         averageProduction: product.averageProduction.toString(),
       });
     } else {
       setEditingProduct(null);
       setFormData({
         productId: '',
+        farmId: '',
         averageProduction: '',
       });
     }
@@ -88,6 +94,7 @@ export default function ProdutosProdutorPage() {
     setEditingProduct(null);
     setFormData({
       productId: '',
+      farmId: '',
       averageProduction: '',
     });
   };
@@ -109,6 +116,7 @@ export default function ProdutosProdutorPage() {
         await producerProductsService.create({
           producerId: user.id,
           productId: formData.productId,
+          farmId: formData.farmId,
           averageProduction: parseFloat(formData.averageProduction),
         });
       }
@@ -142,6 +150,7 @@ export default function ProdutosProdutorPage() {
       
       setFormData({
         productId: newProduct.id,
+        farmId: '',
         averageProduction: '',
       });
       setIsDialogOpen(true);
@@ -237,6 +246,7 @@ export default function ProdutosProdutorPage() {
                       <div>
                         <CardTitle className="text-lg">{pp.product.name}</CardTitle>
                         <p className="text-sm text-gray-500">Unidade: {pp.product.unit}</p>
+                        <p className="text-xs text-green-600 font-medium">{pp.farm.name}</p>
                       </div>
                     </div>
                   </div>
@@ -320,6 +330,45 @@ export default function ProdutosProdutorPage() {
                     </SelectContent>
                   </Select>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="farm">Fazenda</Label>
+                {editingProduct ? (
+                  <Input
+                    value={editingProduct.farm.name}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                ) : (
+                  <Select
+                    value={formData.farmId}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, farmId: value })
+                    }
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma fazenda" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {farms.length === 0 ? (
+                        <SelectItem value="none" disabled>
+                          Nenhuma fazenda cadastrada
+                        </SelectItem>
+                      ) : (
+                        farms.map((farm) => (
+                          <SelectItem key={farm.id} value={farm.id}>
+                            {farm.name}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                )}
+                <p className="text-xs text-gray-500">
+                  Selecione a fazenda onde este produto é cultivado
+                </p>
               </div>
 
               <div className="space-y-2">

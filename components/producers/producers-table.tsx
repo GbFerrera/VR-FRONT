@@ -20,9 +20,10 @@ interface ProducersTableProps {
   producers: User[];
   onEdit?: (producer: User) => void;
   onDelete?: (id: string) => void;
+  onRowClick?: (producer: User) => void;
 }
 
-export function ProducersTable({ producers, onEdit, onDelete }: ProducersTableProps) {
+export function ProducersTable({ producers, onEdit, onDelete, onRowClick }: ProducersTableProps) {
   const getStatusBadge = (status: string) => {
     const variants = {
       ativo: 'bg-green-100 text-green-700 hover:bg-green-200',
@@ -111,7 +112,11 @@ export function ProducersTable({ producers, onEdit, onDelete }: ProducersTablePr
           </TableHeader>
           <TableBody>
             {producers.map((producer) => (
-              <TableRow key={producer.id} className="hover:bg-gray-50">
+              <TableRow 
+                key={producer.id} 
+                className={`hover:bg-gray-50 ${onRowClick ? 'cursor-pointer' : ''}`}
+                onClick={() => onRowClick?.(producer)}
+              >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
@@ -155,7 +160,10 @@ export function ProducersTable({ producers, onEdit, onDelete }: ProducersTablePr
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={() => onEdit(producer)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(producer);
+                        }}
                         className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       >
                         <Edit className="w-4 h-4" />
@@ -165,7 +173,10 @@ export function ProducersTable({ producers, onEdit, onDelete }: ProducersTablePr
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={() => onDelete(producer.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(producer.id);
+                        }}
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />
